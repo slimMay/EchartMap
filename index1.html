@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TW geo info</title>
+</head>
+<body background="green">
+<!-- partial:index.partial.html -->
+<div id="main" style="width:500px; height:500px;"></div>
+<!-- partial -->
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+
+<script>
+  var chartDom = document.getElementById("main");
+  var myChart = echarts.init(chartDom);
+  var option;
+
+  fetch("./TW-10008.json")
+    .then((response) => response.json())
+    .then((geojson) => {
+      echarts.registerMap('TW', geojson);
+      option = {
+         title: {
+        text: '南投縣業績達成率',
+        left: 'center'
+    },
+        tooltip: {
+        trigger: 'item'
+    },
+    
+    toolbox: {
+        show: true,
+        /*orient: 'vertical',*/
+        left: 'right',
+        top:2,
+        /*top: 'center',*/
+        feature: {
+            dataView: { readOnly: false },
+            restore: {},
+            saveAsImage: {}
+        }
+    },
+    geo: {
+        map: 'TW',
+        layoutCenter: ['48%', '38%'],
+        layoutSize: '100%',
+        aspectScale: 1.0, // 调整长宽比
+        zoom: 1.1, // 地图放大1.5倍
+        label: {
+            emphasis: {
+                show: true,
+                textStyle: {
+                    color: '#fff',
+                    fontSize:11
+                }
+            }
+        },
+        roam: true,
+
+        itemStyle: {
+            normal: {
+                areaColor: '#e5e5e5',
+                borderColor: '#111'
+            },            
+            emphasis: {
+                areaColor: 'rgba(42, 50, 60, 0.75)'
+            },
+        }
+    },
+    series: [
+          {
+            /*name: '散點',*/
+            name: 'Top 5',
+            type: 'scatter',
+            coordinateSystem: 'geo',            
+            symbol: 'pin',
+            symbolSize: [50,50],
+            zoom: 4.5, // 地图放大1.2倍
+            label: {
+                normal: {
+                    show: true, // 默认不显示标签
+                    textStyle: {
+                        color: '#fff',
+                        fontSize: 18,
+                    },
+                    formatter (value){
+                        return value.data.value[3]
+                    }
+                 }
+            },
+
+            itemStyle: {
+            color: '#1010e0', // 统一设置为蓝色
+            borderColor:'#fff'
+            },
+
+          data: [
+            {villagename: '埔里鎮', value: [120.96299516724646,23.972475912308166, 3000, 2,'埔里中正']}, // 自定义造访人数
+            {villagename: '草屯鎮', value: [120.68239806909169, 23.97554775727553, 1500,3,'明賢']}, 
+            {villagename: '國姓鄉', value: [120.8572019384131, 24.042318855174692, 4000,5,'南投國姓']},
+            {villagename: '水里鄉', value: [120.8518555807376, 23.807204553667088, 1500,1,'水里']}, 
+            {villagename: '竹山鎮', value: [120.68290136724129, 23.754909136208695, 4000,4,'竹山']}
+           ],
+            zlevel: 3 // 将标注放在更高层级
+          },
+
+
+         {
+            type: 'map',
+            map: 'TW',
+            geoIndex: 0,
+            data:[
+                    {name: '南投市', value: 100},
+                    {name: '埔里鎮', value: 210},
+                    {name: '草屯鎮', value: 158},                    
+                    {name: '竹山鎮', value: 620},
+                    {name: '集集鎮', value: 800},
+                    {name: '名間鄉', value: 205},
+                    {name: '鹿谷鄉', value: 700},                
+                    {name: '中寮鄉', value: 620},
+                    {name: '魚池鄉', value: 730},
+                    {name: '國姓鄉', value: 800},
+                    {name: '水里鄉', value: 205},
+                    {name: '信義鄉', value: 205},
+                    {name: '仁愛鄉', value: 700}
+                 ]
+                }
+            ],
+            tooltip: {
+            trigger: 'item',
+            formatter: function (params) {
+                if (params.seriesType === 'scatter') {
+                return `${params.value[4]}<br/>營業額: ${params.value[2]}`;
+              }
+             }
+            },
+
+    visualMap: {
+                min: 0,
+                max: 1000,
+                left: 'left',
+                bottom: 80,
+                text: ['高', '低'],
+                calculable: true,
+                inRange: {
+                color: ["#23d160","#ffde00","#fc9700","#fa1818"],
+                },
+      seriesIndex: [1] // 只作用于地图数据，不影响散点数据
+   }
+};
+
+myChart.setOption(option);
+    })
+    .catch(error => {
+      console.error("Error loading the map data: ", error);
+    });
+
+</script>
+
+</body>
+</html>
+
